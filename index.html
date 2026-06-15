@@ -818,7 +818,7 @@
     <div class="next-steps">
       <h3 data-en="What happens next" data-no="Hva skjer videre">Hva skjer videre</h3>
       <ol>
-        <li data-en="Your email app should have opened with the submission ready to send — please send it to roy@saysomething.no to complete your submission." data-no="E-postappen din skal ha åpnet seg med innsendingen klar — send den til roy@saysomething.no for å fullføre.">E-postappen din skal ha åpnet seg med innsendingen klar — send den til roy@saysomething.no for å fullføre.</li>
+        <li data-en="Your partner agreement details have been securely recorded in our database." data-no="Dine opplysninger for partneravtalen er registrert og lagret i vår database.">Dine opplysninger for partneravtalen er registrert og lagret i vår database.</li>
         <li data-en="Save or print this page as a PDF for your records (use the button below)." data-no="Lagre eller skriv ut denne siden som PDF for ditt arkiv (bruk knappen nedenfor).">Lagre eller skriv ut denne siden som PDF for ditt arkiv (bruk knappen nedenfor).</li>
         <li data-en="We'll reach out within 3 business days to schedule a kick-off call." data-no="Vi tar kontakt innen 3 virkedager for å avtale en oppstartssamtale.">Vi tar kontakt innen 3 virkedager for å avtale en oppstartssamtale.</li>
         <li data-en="Joint advertising planning begins immediately after signature." data-no="Planlegging av felles markedsføring starter umiddelbart etter signering.">Planlegging av felles markedsføring starter umiddelbart etter signering.</li>
@@ -1066,10 +1066,9 @@
     }
 
     if (!WEB_APP_URL) {
-      console.warn('WEB_APP_URL is not configured. Falling back to email/confirmation only.');
+      console.warn('WEB_APP_URL is not configured. Falling back to confirmation screen.');
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnText;
-      triggerEmail(currentData, currentRefId);
       return;
     }
 
@@ -1084,14 +1083,11 @@
     .then(response => {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnText;
-      triggerEmail(currentData, currentRefId);
     })
     .catch(err => {
       console.error('Submission failed:', err);
-      // Fallback: Proceed with client flow even if the Apps Script URL fails
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnText;
-      triggerEmail(currentData, currentRefId);
     });
   });
 
