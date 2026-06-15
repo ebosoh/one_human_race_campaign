@@ -3,6 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5DLE1S1JP7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5DLE1S1JP7');
+</script>
 <title>Campaign Partner Agreement — One Human Race</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -826,6 +835,9 @@
 </main>
 
 <script>
+  // ===== Google Sheets Web App Config =====
+  const WEB_APP_URL = ''; // Add your Google Apps Script Web App URL here
+
   // ===== State & localStorage =====
   const STORAGE_KEY = 'ohr-partner-signup-v1';
   const form = document.getElementById('partnerForm');
@@ -1032,9 +1044,55 @@
   form.addEventListener('submit', function(e) {
     e.preventDefault();
     if (!validate()) return;
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+
+    // Set loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = getCurrentLang() === 'no' ? 'Sender inn...' : 'Submitting...';
+
+    // showConfirmation generates currentData and currentRefId globally
     showConfirmation();
-    // Open the partner's email client with the submission pre-filled
-    triggerEmail(currentData, currentRefId);
+    currentData.refId = currentRefId;
+
+    // GA4 Event Tracking
+    if (typeof gtag === 'function') {
+      gtag('event', 'partner_agreement_submission', {
+        'event_category': 'Engagement',
+        'event_label': currentData.tier,
+        'value': parseFloat(currentData.tier_amount) || 0
+      });
+    }
+
+    if (!WEB_APP_URL) {
+      console.warn('WEB_APP_URL is not configured. Falling back to email/confirmation only.');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+      triggerEmail(currentData, currentRefId);
+      return;
+    }
+
+    fetch(WEB_APP_URL, {
+      method: 'POST',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify(currentData)
+    })
+    .then(response => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+      triggerEmail(currentData, currentRefId);
+    })
+    .catch(err => {
+      console.error('Submission failed:', err);
+      // Fallback: Proceed with client flow even if the Apps Script URL fails
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+      triggerEmail(currentData, currentRefId);
+    });
   });
 
   function gatherData() {
